@@ -1,0 +1,11 @@
+# Godot
+.godot/
+.mono/
+*.translation
+build/
+
+# .NET
+bin/
+obj/
+*.user
+.vs/
