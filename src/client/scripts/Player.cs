@@ -18,6 +18,17 @@ public partial class Player : CharacterBody3D
 	[Export] public float MouseSensitivity { get; set; } = 0.0022f;
 	[Export] public float EyeHeight { get; set; } = 1.62f;
 
+	/// <summary>Holds the player still, e.g. until the server has said where they are.</summary>
+	public bool Frozen { get; set; }
+
+	/// <summary>A line of connection status shown under the controls.</summary>
+	public string Status { get; set; } = "";
+
+	/// <summary>Facing, in radians: 0 looks north (-z), positive turns left.</summary>
+	public float Yaw => _yaw;
+
+	public float Pitch => _pitch;
+
 	private float _yaw;
 	private float _pitch;
 	private readonly float _gravity = ProjectSettings.GetSetting("physics/3d/default_gravity").AsSingle();
@@ -57,6 +68,11 @@ public partial class Player : CharacterBody3D
 
 	public override void _PhysicsProcess(double delta)
 	{
+		if (Frozen)
+		{
+			Velocity = Vector3.Zero;
+			return;
+		}
 		var dt = (float)delta;
 		var input = Input.GetVector("move_left", "move_right", "move_forward", "move_back");
 		var wish = new Basis(Vector3.Up, _yaw) * new Vector3(input.X, 0.0f, input.Y);
@@ -87,7 +103,7 @@ public partial class Player : CharacterBody3D
 		if (_fpsTimer <= 0.0)
 		{
 			_fpsTimer = 0.5;
-			_info.Text = $"KESSA OUTPOST   {Engine.GetFramesPerSecond():F0} FPS\nWASD move  SHIFT run  SPACE jump  ESC free mouse";
+			_info.Text = $"KESSA OUTPOST   {Engine.GetFramesPerSecond():F0} FPS\nWASD move  SHIFT run  SPACE jump  ESC free mouse\n{Status}";
 		}
 	}
 

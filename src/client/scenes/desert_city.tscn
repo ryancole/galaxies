@@ -4,6 +4,7 @@
 [ext_resource type="Script" path="res://scripts/CityBuilder.cs" id="2_city"]
 [ext_resource type="PackedScene" path="res://scenes/player.tscn" id="3_player"]
 [ext_resource type="Script" path="res://scripts/DebugCapture.cs" id="4_capture"]
+[ext_resource type="Script" path="res://scripts/NetworkClient.cs" id="5_network"]
 
 [node name="DesertCity" type="Node3D"]
 
@@ -37,3 +38,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, 236)
 
 [node name="DebugCapture" type="Node" parent="."]
 script = ExtResource("4_capture")
+
+[node name="Network" type="Node" parent="."]
+script = ExtResource("5_network")

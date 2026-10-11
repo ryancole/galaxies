@@ -1,0 +1,8 @@
+<Solution>
+  <Project Path="Galaxies.Protocol/Galaxies.Protocol.csproj" />
+  <Project Path="Galaxies.Protocol.Tests/Galaxies.Protocol.Tests.csproj" />
+  <Project Path="Galaxies.Server/Galaxies.Server.csproj" />
+  <Project Path="Galaxies.Server.Tests/Galaxies.Server.Tests.csproj" />
+  <Project Path="Galaxies.Sim/Galaxies.Sim.csproj" />
+  <Project Path="Galaxies.Sim.Tests/Galaxies.Sim.Tests.csproj" />
+</Solution>

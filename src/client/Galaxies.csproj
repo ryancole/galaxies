@@ -5,4 +5,7 @@
     <Nullable>enable</Nullable>
     <RootNamespace>Galaxies</RootNamespace>
   </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\server\Galaxies.Protocol\Galaxies.Protocol.csproj" />
+  </ItemGroup>
 </Project>
