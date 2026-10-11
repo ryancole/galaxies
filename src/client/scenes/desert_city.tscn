@@ -5,6 +5,7 @@
 [ext_resource type="PackedScene" path="res://scenes/player.tscn" id="3_player"]
 [ext_resource type="Script" path="res://scripts/DebugCapture.cs" id="4_capture"]
 [ext_resource type="Script" path="res://scripts/NetworkClient.cs" id="5_network"]
+[ext_resource type="Script" path="res://scripts/OasisBuilder.cs" id="6_oasis"]
 
 [node name="DesertCity" type="Node3D"]
 
@@ -32,6 +33,9 @@ directional_shadow_max_distance = 80.0
 
 [node name="City" type="Node3D" parent="."]
 script = ExtResource("2_city")
+
+[node name="Oasis" type="Node3D" parent="."]
+script = ExtResource("6_oasis")
 
 [node name="Player" parent="." instance=ExtResource("3_player")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, 236)

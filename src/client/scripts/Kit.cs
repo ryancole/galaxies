@@ -86,6 +86,25 @@ public static class Kit
 		return m;
 	}
 
+	/// <summary>
+	/// Untextured, double-sided matte material for palms, reeds and shrubs. Takes its colour from the mesh's
+	/// vertex colours (or a MultiMesh's instance colours), so the facets carry the look.
+	/// </summary>
+	public static StandardMaterial3D Foliage()
+	{
+		if (Materials.TryGetValue("foliage", out var m))
+			return m;
+		m = new StandardMaterial3D
+		{
+			VertexColorUseAsAlbedo = true,
+			Roughness = 0.9f,
+			MetallicSpecular = 0.2f,
+			CullMode = BaseMaterial3D.CullModeEnum.Disabled,
+		};
+		Materials["foliage"] = m;
+		return m;
+	}
+
 	/// <summary>A box centred on the origin with every edge chamfered.</summary>
 	public static ArrayMesh Box(Vector3 size, float bevel = 0.1f)
 	{
