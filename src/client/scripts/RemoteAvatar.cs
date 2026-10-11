@@ -12,7 +12,10 @@ public partial class RemoteAvatar : Node3D
 	/// <summary>How far behind the newest snapshot the avatar is drawn: two snapshots at 20 Hz, so one can be lost.</summary>
 	private const double Delay = 0.1;
 
-	private static readonly string[] Models = ["res://models/meshy_human_10k.glb", "res://models/meshy_female_10k.glb"];
+	public const string MaleModel = "res://models/meshy_human_10k.glb";
+	public const string FemaleModel = "res://models/meshy_female_10k.glb";
+
+	private static readonly string[] Models = [MaleModel, FemaleModel];
 
 	private readonly List<(double Time, Vector3 Position, float Yaw)> _samples = [];
 	private AnimationPlayer? _animation;
@@ -23,12 +26,18 @@ public partial class RemoteAvatar : Node3D
 	public static RemoteAvatar Create(int playerId)
 	{
 		var avatar = new RemoteAvatar { PlayerId = playerId, Name = $"Player{playerId}" };
-		var body = GD.Load<PackedScene>(Models[playerId % Models.Length]).Instantiate<Node3D>();
-		// The models face +z; a yaw of 0 looks north (-z).
-		body.RotationDegrees = new Vector3(0, 180, 0);
+		var body = LoadBody(Models[playerId % Models.Length], out avatar._animation);
 		avatar.AddChild(body);
-		avatar._animation = body.FindChild("AnimationPlayer", true, false) as AnimationPlayer;
 		return avatar;
+	}
+
+	/// <summary>Loads a character model turned so that a yaw of 0 looks north (-z), as the models face +z.</summary>
+	public static Node3D LoadBody(string path, out AnimationPlayer? animation)
+	{
+		var body = GD.Load<PackedScene>(path).Instantiate<Node3D>();
+		body.RotationDegrees = new Vector3(0, 180, 0);
+		animation = body.FindChild("AnimationPlayer", true, false) as AnimationPlayer;
+		return body;
 	}
 
 	/// <summary>Adds a position from a snapshot, received at <paramref name="time"/> seconds.</summary>
@@ -66,20 +75,21 @@ public partial class RemoteAvatar : Node3D
 
 		var speed = new Vector2(Position.X - _lastPosition.X, Position.Z - _lastPosition.Z).Length() / Mathf.Max((float)delta, 1e-4f);
 		_lastPosition = Position;
-		Animate(speed);
+		Animate(_animation, speed);
 	}
 
-	private void Animate(float speed)
+	/// <summary>Plays idle, walk or run on a character model to match its ground speed.</summary>
+	public static void Animate(AnimationPlayer? animation, float speed)
 	{
-		if (_animation is null) return;
+		if (animation is null) return;
 		var name = speed switch
 		{
-			> 6.0f when _animation.HasAnimation("Run") => "Run",
-			> 0.5f when _animation.HasAnimation("Walk") => "Walk",
+			> 6.0f when animation.HasAnimation("Run") => "Run",
+			> 0.5f when animation.HasAnimation("Walk") => "Walk",
 			_ => "Idle",
 		};
-		if (_animation.CurrentAnimation == name || !_animation.HasAnimation(name)) return;
-		_animation.GetAnimation(name).LoopMode = Animation.LoopModeEnum.Linear;
-		_animation.Play(name, 0.2);
+		if (animation.CurrentAnimation == name || !animation.HasAnimation(name)) return;
+		animation.GetAnimation(name).LoopMode = Animation.LoopModeEnum.Linear;
+		animation.Play(name, 0.2);
 	}
 }

@@ -52,6 +52,10 @@ run={
 "deadzone": 0.2,
 "events": [Object(InputEventKey,"physical_keycode":4194325)]
 }
+toggle_view={
+"deadzone": 0.2,
+"events": [Object(InputEventKey,"physical_keycode":86)]
+}
 
 [physics]
 

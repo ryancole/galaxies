@@ -49,4 +49,4 @@ offset_bottom = 70.0
 theme_override_colors/font_color = Color(1, 1, 1, 0.85)
 theme_override_font_sizes/font_size = 12
 text = "KESSA OUTPOST
-WASD move  SHIFT run  SPACE jump  ESC free mouse"
+WASD move  SHIFT run  SPACE jump  V view  WHEEL zoom  ESC free mouse"
