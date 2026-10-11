@@ -1,0 +1,39 @@
+[gd_scene format=3]
+
+[ext_resource type="Environment" path="res://env/desert_environment.tres" id="1_env"]
+[ext_resource type="Script" path="res://scripts/CityBuilder.cs" id="2_city"]
+[ext_resource type="PackedScene" path="res://scenes/player.tscn" id="3_player"]
+[ext_resource type="Script" path="res://scripts/DebugCapture.cs" id="4_capture"]
+
+[node name="DesertCity" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = ExtResource("1_env")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+rotation_degrees = Vector3(-14, -100, 0)
+light_color = Color(1, 0.8, 0.58, 1)
+light_energy = 2.2
+light_volumetric_fog_energy = 0.15
+shadow_enabled = true
+shadow_blur = 0.5
+directional_shadow_max_distance = 140.0
+
+[node name="SecondSun" type="DirectionalLight3D" parent="."]
+rotation_degrees = Vector3(-8, -86, 0)
+light_color = Color(1, 0.45, 0.25, 1)
+light_energy = 0.7
+light_volumetric_fog_energy = 0.08
+shadow_enabled = true
+shadow_blur = 0.5
+directional_shadow_mode = 1
+directional_shadow_max_distance = 80.0
+
+[node name="City" type="Node3D" parent="."]
+script = ExtResource("2_city")
+
+[node name="Player" parent="." instance=ExtResource("3_player")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, 236)
+
+[node name="DebugCapture" type="Node" parent="."]
+script = ExtResource("4_capture")
