@@ -41,8 +41,6 @@ public partial class CityBuilder : Node3D
 	private static readonly Color Red = new(1.0f, 0.15f, 0.06f);
 	private static readonly Color Beacon = new(1.0f, 0.45f, 0.1f);
 	private static readonly Color Orange = new(0.95f, 0.45f, 0.12f);
-	private static readonly string[] HumanPaths = ["res://models/meshy_human_10k.glb", "res://models/meshy_female_10k.glb"];
-	public const int Female = 1;
 	private static readonly Color Rust = new(0.62f, 0.42f, 0.3f);
 	private static readonly Color[] Cloth = [new(0.62f, 0.38f, 0.27f), new(0.42f, 0.5f, 0.48f), new(0.64f, 0.58f, 0.42f)];
 
@@ -67,7 +65,6 @@ public partial class CityBuilder : Node3D
 	private readonly RandomNumberGenerator _rng = new();
 	private readonly FastNoiseLite _noise = new();
 	private readonly Dictionary<string, Shape3D> _shapes = new();
-	private PackedScene[] _humans = [];
 
 	public override void _Ready()
 	{
@@ -78,7 +75,6 @@ public partial class CityBuilder : Node3D
 	{
 		foreach (var child in GetChildren())
 			child.Free();
-		_humans = HumanPaths.Select(GD.Load<PackedScene>).ToArray();
 		_rng.Seed = (ulong)CitySeed;
 		_noise.Seed = CitySeed;
 		_noise.NoiseType = FastNoiseLite.NoiseTypeEnum.SimplexSmooth;
@@ -241,9 +237,7 @@ public partial class CityBuilder : Node3D
 		// Market in the north-east corner.
 		for (var k = 0; k < 4; k++)
 			Stall(g, new Vector3(18 + k * 6.0f, 0.1f, -30), 0.0f, Cloth[k % Cloth.Length]);
-		Human(g, new Vector3(21, 0.1f, -25), Mathf.Pi, Female);
-		Human(g, new Vector3(31, 0.1f, -26), Mathf.Pi + 0.4f, Female);
-		Human(g, new Vector3(26, 0.1f, -24.5f), 2.6f);
+		SkipDraws(1); // A townsperson stood here.
 		StreetLamp(g, new Vector3(27, 0.1f, -20), new Vector3(0, 0, -1));
 
 		// Cargo yard in the south-east corner.
@@ -254,7 +248,7 @@ public partial class CityBuilder : Node3D
 		}
 		Vaporator(g, new Vector3(38, 0.1f, 20));
 		Vaporator(g, new Vector3(38, 0.1f, 30));
-		Human(g, new Vector3(26, 0.1f, 30), -1.2f);
+		SkipDraws(1); // A townsperson stood here.
 		Skiff(g, new Vector3(14, 0.1f, 36), 0.3f);
 
 		// Water dispenser and benches in the south-west corner.
@@ -264,8 +258,6 @@ public partial class CityBuilder : Node3D
 		Screen(g, new Vector3(-24.0f, 1.7f, 30.9f), 0.0f, "water", new Vector2(0.8f, 0.6f));
 		for (var k = 0; k < 3; k++)
 			Box(g, new Vector3(3, 0.5f, 0.8f), new Vector3(-34 + k * 5.0f, 0.1f, 22), "olive");
-		Human(g, new Vector3(-27, 0.1f, 32.6f), Mathf.Pi, Female);
-		Human(g, new Vector3(-30, 0.1f, 21), 0.0f, Female);
 		Skiff(g, new Vector3(-14, 0.1f, 34), -0.2f);
 
 		Vector3[] lamps = [new(-38, 0.1f, 38), new(38, 0.1f, 38), new(-10, 0.1f, -12), new(10, 0.1f, 12)];
@@ -331,9 +323,7 @@ public partial class CityBuilder : Node3D
 			CrateStack(g, new Vector3(s * (e - 4.0f), 0.14f, 9.0f), 2);
 		}
 		Console(g, new Vector3(gate * 0.5f + 4.0f, 0.14f, e - t - 1.4f), Mathf.Pi, "bay");
-		Human(g, new Vector3(gate * 0.5f + 4.0f, 0.14f, e - t - 3.0f), Mathf.Pi, Female);
-		Human(g, new Vector3(-6, 0.14f, 8), 2.2f, Female);
-		Human(g, new Vector3(5, 0.14f, 9), -0.8f);
+		SkipDraws(1); // A townsperson stood here.
 	}
 
 	private void BuildAvenues()
@@ -556,7 +546,7 @@ public partial class CityBuilder : Node3D
 		if (_rng.Randf() < 0.5f)
 			Vaporator(g, new Vector3(_rng.RandfRange(-4, 4), 0, -4.5f));
 		if (_rng.Randf() < 0.35f)
-			Human(g, new Vector3(_rng.RandfRange(-3, 3), 0, _rng.RandfRange(-1, 4)), _rng.Randf() * Mathf.Tau);
+			SkipDraws(4); // A townsperson stood here.
 		if (_rng.Randf() < 0.5f)
 			StreetLamp(g, new Vector3(-5.5f, 0, 5.5f), new Vector3(1, 0, 0));
 	}
@@ -566,11 +556,10 @@ public partial class CityBuilder : Node3D
 		var stalls = _rng.RandiRange(2, 3);
 		for (var i = 0; i < stalls; i++)
 			Stall(g, new Vector3(-4.5f + i * 4.5f, 0, -2.0f), 0.0f, Cloth[_rng.Randi() % Cloth.Length]);
-		var people = _rng.RandiRange(1, 3);
-		for (var i = 0; i < people; i++)
-			Human(g, new Vector3(_rng.RandfRange(-5, 5), 0, _rng.RandfRange(1.5f, 5)), _rng.RandfRange(2.5f, 3.8f), Female);
+		// Shoppers and a stallholder stood here.
+		SkipDraws(3 * _rng.RandiRange(1, 3));
 		if (_rng.Randf() < 0.5f)
-			Human(g, new Vector3(5.5f, 0, 3.5f), _rng.Randf() * Mathf.Tau);
+			SkipDraws(2);
 	}
 
 	private void ScrapLot(Node3D g)
@@ -645,9 +634,8 @@ public partial class CityBuilder : Node3D
 		Box(g, new Vector3(10.4f, 0.12f, 3.0f), new Vector3(0, f + 1.1f, -2), "metal", false, 0.04f);
 		Glow(g, new Vector3(9.6f, 0.1f, 0.05f), new Vector3(0, f + 0.85f, -0.68f), Cyan, 2.5f);
 		Spot(g, new Vector3(0, f + 0.9f, -0.4f), new Vector3(0, -0.3f, 1), Cyan, 0.6f, 4.0f, 70.0f, true, 0.3f, 35.0f);
-		Human(g, new Vector3(2.5f, f, -4.2f), 0.0f);
-		for (var k = 0; k < 5; k++)
-			Human(g, new Vector3(-4 + k * 2.0f, f, 0.2f), Mathf.Pi + _rng.RandfRange(-0.3f, 0.3f), Female);
+		SkipDraws(1); // The barkeep stood here.
+		SkipDraws(5); // Drinkers stood along the bar.
 		// Back shelves with bottles, and two screens above.
 		Color[] bottles = [Green, Amber, Cyan, Amber];
 		foreach (var y in (float[])[1.2f, 1.9f])
@@ -670,19 +658,15 @@ public partial class CityBuilder : Node3D
 				Box(g, new Vector3(0.3f, 1.5f, 2.4f), new Vector3(s * (iw * 0.5f - 0.15f), f, z), "olive");
 				Box(g, new Vector3(1.0f, 0.85f, 1.4f), new Vector3(s * (iw * 0.5f - 1.6f), f, z), "dark");
 			}
-			Human(g, new Vector3(s * (iw * 0.5f - 0.7f), f, 0.5f), -s * Mathf.Pi * 0.5f, Female);
 			CeilingLamp(g, new Vector3(s * (iw * 0.5f - 1.6f), h, 3.2f), f, Amber);
 		}
 		// Round tables in the middle.
 		foreach (var p in (Vector3[])[new(-5, f, 4.5f), new(5, f, 5.5f), new(0, f, 6.5f)])
 			Lathe(g, [new(0.4f, 0), new(0.15f, 0.1f), new(0.15f, 0.8f), new(0.75f, 0.85f), new(0.75f, 0.95f), new(0, 0.95f)], 10, p, "metal", 0.75f);
-		Human(g, new Vector3(-5, f, 5.6f), Mathf.Pi, Female);
-		Human(g, new Vector3(5.8f, f, 6.2f), -2.2f, Female);
 		// Band stage in the back corner.
 		Box(g, new Vector3(5, 0.4f, 3.5f), new Vector3(-iw * 0.5f + 3.2f, f, back + 2.4f), "metal");
 		Box(g, new Vector3(5, 0.05f, 0.3f), new Vector3(-iw * 0.5f + 3.2f, f + 0.1f, back + 4.2f), "hazard", false, 0.01f);
-		for (var k = 0; k < 3; k++)
-			Human(g, new Vector3(-iw * 0.5f + 1.8f + k * 1.4f, f + 0.4f, back + 2.2f), 0.0f);
+		SkipDraws(3); // The band stood on the stage.
 		// Lamps over the bar, the stage and the booths.
 		foreach (var x in (float[])[-3.0f, 3.0f])
 			CeilingLamp(g, new Vector3(x, h, -2), f, Warm);
@@ -698,8 +682,6 @@ public partial class CityBuilder : Node3D
 		string[] keys = ["traffic", "power", "water"];
 		for (var k = 0; k < 3; k++)
 			Console(g, new Vector3(-3.2f + k * 3.2f, f, -id * 0.5f + 0.6f), 0.0f, keys[k]);
-		Human(g, new Vector3(-3.2f, f, -id * 0.5f + 2.0f), Mathf.Pi, Female);
-		Human(g, new Vector3(3.2f, f, -id * 0.5f + 2.1f), Mathf.Pi + 0.3f, Female);
 		Screen(g, new Vector3(-iw * 0.5f + 0.1f, 2.4f, 0.5f), Mathf.Pi * 0.5f, "traffic", new Vector2(2.0f, 1.5f));
 		CeilingLamp(g, new Vector3(0, h, -0.5f), f, Cool);
 	}
@@ -722,7 +704,6 @@ public partial class CityBuilder : Node3D
 		Screen(g, new Vector3(-iw * 0.5f + 0.1f, 2.0f, 0), Mathf.Pi * 0.5f, "workshop");
 		CrateStack(g, new Vector3(iw * 0.5f - 1.0f, f, 3.0f), 2);
 		CrateStack(g, new Vector3(iw * 0.5f - 1.0f, f, 1.6f), 3);
-		Human(g, new Vector3(-iw * 0.5f + 1.8f, f, 0.5f), -Mathf.Pi * 0.5f, Female);
 		CeilingLamp(g, new Vector3(1.5f, h, -1.5f), f, Warm);
 		CeilingLamp(g, new Vector3(-iw * 0.5f + 1.4f, h, 2.0f), f, Amber, false);
 	}
@@ -741,7 +722,6 @@ public partial class CityBuilder : Node3D
 		foreach (var s in Signs)
 			Box(g, new Vector3(0.5f, 0.5f, 0.5f), new Vector3(0.5f + s * 1.2f, f, 0.5f), "olive");
 		Screen(g, new Vector3(iw * 0.5f - 0.1f, 1.9f, 0.5f), -Mathf.Pi * 0.5f, "hab");
-		Human(g, new Vector3(-0.8f, f, 0.6f), Mathf.Pi * 0.5f, Female);
 		CeilingLamp(g, new Vector3(0.5f, h, 0.5f), f, Amber);
 	}
 
@@ -767,7 +747,7 @@ public partial class CityBuilder : Node3D
 		}
 		Box(g, new Vector3(0.3f, 0.03f, id - 1.0f), new Vector3(-1.4f, f, 0), "hazard", false, 0.01f);
 		Box(g, new Vector3(0.3f, 0.03f, id - 1.0f), new Vector3(1.4f, f, 0), "hazard", false, 0.01f);
-		Human(g, new Vector3(0, f, 2.5f), Mathf.Pi);
+		SkipDraws(1); // A townsperson stood here.
 		Screen(g, new Vector3(iw * 0.5f - 0.1f, 2.0f, 4.0f), -Mathf.Pi * 0.5f, "storage");
 		CeilingLamp(g, new Vector3(0, h, -2.5f), f, Cool);
 		CeilingLamp(g, new Vector3(0, h, 2.5f), f, Cool, false);
@@ -963,35 +943,6 @@ public partial class CityBuilder : Node3D
 		Glow(parent, new Vector3(0.1f, 0.1f, 0.06f), pos + new Vector3(0, 1.6f, 0.39f), Blue, 4.0f);
 	}
 
-	/// <summary>
-	/// A townsperson: one of the Meshy humans, looping its idle from a random point.
-	/// With model set (an index into the humans) it doesn't draw from _rng, so the
-	/// layout after it stays the same.
-	/// </summary>
-	private void Human(Node3D parent, Vector3 pos, float rotY, int model = -1)
-	{
-		var g = Group(parent, pos, rotY);
-		float phase;
-		if (model < 0)
-		{
-			var r = _rng.Randf() * _humans.Length;
-			model = (int)r;
-			phase = r % 1.0f;
-		}
-		else
-		{
-			phase = Mathf.PosMod(pos.X * 0.37f + pos.Z * 0.61f, 1.0f);
-		}
-		var body = _humans[model].Instantiate<Node3D>();
-		g.AddChild(body);
-		if (body.FindChild("AnimationPlayer", true, false) is AnimationPlayer player && player.HasAnimation("Idle"))
-		{
-			player.GetAnimation("Idle").LoopMode = Animation.LoopModeEnum.Linear;
-			player.Play("Idle");
-			player.Seek(phase * player.CurrentAnimationLength, true);
-		}
-		Collider(g, new Vector3(0.6f, 1.8f, 0.5f), Vector3.Zero);
-	}
 
 	/// <summary>A small hover skiff, or a stripped wreck of one.</summary>
 	private void Skiff(Node3D parent, Vector3 pos, float rotY, bool wrecked = false)
@@ -1132,10 +1083,6 @@ public partial class CityBuilder : Node3D
 		return node;
 	}
 
-	private void Collider(Node3D parent, Vector3 size, Vector3 pos)
-	{
-		ColliderShape(parent, BoxShape(size), pos + new Vector3(0, size.Y * 0.5f, 0));
-	}
 
 	private static void ColliderShape(Node3D parent, Shape3D shape, Vector3 center)
 	{
@@ -1198,6 +1145,16 @@ public partial class CityBuilder : Node3D
 		l.DistanceFadeBegin = dist;
 		l.DistanceFadeLength = dist * 0.25f;
 		l.DistanceFadeShadow = dist * 0.6f;
+	}
+
+	/// <summary>
+	/// Uses up <paramref name="count"/> random numbers. The townspeople that used to be baked into the level drew
+	/// these; drawing them still keeps the rest of the layout exactly as it was. NPCs now come from the server.
+	/// </summary>
+	private void SkipDraws(int count)
+	{
+		for (var i = 0; i < count; i++)
+			_rng.Randf();
 	}
 
 	private List<T> Shuffled<T>(List<T> items)
